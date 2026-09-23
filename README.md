@@ -21,7 +21,7 @@
 
 ## What This Does
 
-This project uses the campus_life corpus to answer practical student questions about dining halls, housing, deadlines, academic policies, and course expectations. The system retrieves the most relevant text chunks for a question, checks whether the match is strong enough, and then writes an answer grounded in the source documents it found.
+This project uses the campus_life corpus to answer practical student questions about dining halls, housing, academic deadlines, financial aid, and course policies. The system loads the student-written documents, retrieves the closest matching chunks, rejects off-topic questions with a relevance gate, and then writes a short answer that names the source file it used. The goal is not to sound smart in general; it is to answer from the campus documents the project actually contains.
 
 ## Chunking Strategy
 
@@ -119,18 +119,9 @@ I measured the best retrieval distance for my five in-corpus questions and my fi
 
 ## How I Used AI
 
-<!-- Two specific moments. For each: what you asked for, what came back, and
-     what you changed about it.
+**1.** I asked AI to help me design a chunking strategy for the campus_life documents. It suggested a generic 800-character split with overlap, but the corpus data showed almost every post was under 500 characters and the average document was only 317 characters. I changed the system to a 600-character window with 100-character overlap and kept whole short posts together, because the real first finding was that one student post already behaves like one useful chunk.
 
-     "I asked Claude to write the chunking function from my notes. It ignored
-     the overlap, so I added that myself" is the level of detail we're after.
-     "I used AI to help me code" is not.
-
-     Milestone 5. -->
-
-**1.**
-
-**2.**
+**2.** I asked AI to help tighten the grounding and cutoff logic so answers would stay honest and sourced. It initially produced a general-sounding answer style that was plausible but not tied to the files, so I revised the grounding instruction to require using only the provided documents, refusing unsupported questions, and naming the source filename in the answer. I also used the measured retrieval distances to set the cutoff at 0.6, because the valid questions clustered around 0.21–0.44 while the off-topic ones were 0.82–0.93, leaving a clear refusal boundary.
 
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
