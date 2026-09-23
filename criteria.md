@@ -19,12 +19,11 @@ pipeline earns credit; *"80% seemed reasonable"* does not.
 
 ## 1. Retrieved chunks contain the answer
 
-For at least 4 of my 5 test questions, the retrieved chunks include one that
-contains the answer.
+For at least 4 of my 5 test questions, the retrieved chunks include one that contains the answer.
 
 **Why this target:**
-<!-- e.g. "One of my questions is about a topic only two documents mention, so
-     I expect that one to be hard." -->
+One of my questions is about a topic only two documents mention, so I expect that one to be hard.
+
 
 ---
 
@@ -33,16 +32,13 @@ contains the answer.
 Every answer the system produces names at least one source document.
 
 **Why this target:**
-<!-- Why all five and not four? What about your setup makes that achievable —
-     or what would have to go wrong for it not to be? -->
+I want the answer to be retrieved from at least one reliable source that I put in here.
 
 ---
 
 ## 3. The relevance gate stops out-of-corpus questions
 
-When I ask a question my documents clearly don't cover, the relevance gate
-stops it and the system returns "I don't have enough information about that" —
-in at least 4 of 5 tries.
+When I ask a question my documents clearly don't cover, the relevance gate stops it and the system returns "I don't have enough information about that" — in at least 4 of 5 tries.
 
 <!-- The five questions are the ones in `OUT_OF_SCOPE` at the bottom of
      `questions.py`, and `run_eval.py` puts them through the gate and writes
@@ -50,48 +46,25 @@ in at least 4 of 5 tries.
      just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
 
 **Why this target:**
-<!-- What did your distances look like when you set the cutoff in Milestone 4?
-     Was there a clean gap, or did the two groups overlap? -->
+When there's no source related to the question, it's better to stop than trying to "make up" an answer and waste tokens.
 
 ---
 
-## 4. Something about your chunks
+## 4. No chunk has incomplete sentences.
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
-
-
+For at least 4 of 5 sampled chunks, the text reads as a complete thought, with no sentence cut in half at either end.
 
 **Why this target:**
-
-
+A chunk that ends mid-sentence is unreadable and a clear sign the chunk boundaries are wrong. I want the answer to read cleanly on its own instead of feeling like incomplete.
 
 ---
 
-## 5. Your choice
+## 5. The named source is the correct one
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
-
-
+For at least 4 of 5 answers, the source document named in the response is one that actually contains the answer to the question, not just a related topic.
 
 **Why this target:**
-
-
+In a campus-life corpus, several documents are about nearby policies or procedures, so a system can easily cite a plausible-looking file without grounding the answer in the right place. I care about correct attribution because a student trying to follow advice needs the right document, not just any document that sounds similar.
 
 ---
 
