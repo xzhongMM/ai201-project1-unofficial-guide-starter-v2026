@@ -150,15 +150,76 @@ I measured the best retrieval distance for my five in-corpus questions and my fi
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 4/5 | 5/5 | 5/5 | MISSED |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 4. No chunk has incomplete sentences | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 5. The named source is the correct one | 4 of 5 | 4/5 | 5/5 | 5/5 | MET |
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
      Name the file and function that produced it. -->
+
+**Evidence file:** `results/run_2026-09-23_2042_before.md`
+
+### Criterion 1 — retrieved chunk contains the answer
+
+Produced by `run_eval.py::run_once`, using `store.py::search`:
+
+```
+Sources retrieved: dining_halden_hall_followup.txt, dining_kestrel_commons_followup.txt, dining_north_kitchen_followup.txt, dining_the_atrium_followup.txt, dining_the_ridgeway_cafe_followup.txt
+
+The wait figure at Kestrel Commons is 20 to 25 minutes between 12:15 and 1:00 (dining_kestrel_commons_followup.txt).
+```
+
+The retrieved source contains the answer for each of the five in-corpus questions. Retrieval is deterministic, so this is 5/5 in all three runs.
+
+### Criterion 2 — every answer names a source
+
+Produced by `run_eval.py::run_once`, with answer text from `generate.py::answer_from_chunks`:
+
+```
+The wait figure at Kestrel Commons is 20 to 25 minutes between 12:15 and 1:00 (dining_kestrel_commons_followup.txt).
+```
+
+This was run 1 for the Commons question and contains no `Source:` line, while runs 2 and 3 did. The resulting counts are 4/5, 5/5, and 5/5.
+
+### Criterion 3 — gate stops out-of-corpus questions
+
+Produced by `run_eval.py::check_out_of_scope`, using `gate.py::check`:
+
+```
+Refused 5 of 5.
+What is the capital of Mongolia? — refused
+How do I change the oil in a diesel engine? — refused
+Who won the 1994 World Cup? — refused
+What is the recommended dosage of ibuprofen for a headache? — refused
+How do I write a for loop in Rust? — refused
+```
+
+The gate is deterministic, so the same 5/5 goes in all three columns.
+
+### Criterion 4 — no chunk has incomplete sentences
+
+Produced by `chunker.py::split_documents`:
+
+```
+On the add/drop deadline
+
+You can add a course through the end of the second week. Dropping is a longer window — through the end of week six — but a drop after week two shows as a W on your transcript. Nothing anywhere on the registrar's site says this plainly, and students find out from each other.
+```
+
+All five sampled chunks in Unit 1 read as complete thoughts, giving 5/5 in each run column.
+
+### Criterion 5 — the named source is the correct one
+
+Produced by `run_eval.py::run_once`, with answer text from `generate.py::answer_from_chunks`:
+
+```
+Juniors and seniors are ordered by accumulated credit hours first, and only tie-break randomly (admin_housing_lottery.txt).
+```
+
+The named source contains the answer for every answer that names a source. The first Commons answer omitted a source, so the counts are 4/5, 5/5, and 5/5.
 
 ## Verdicts
 
