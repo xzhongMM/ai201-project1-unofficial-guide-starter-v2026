@@ -234,11 +234,11 @@ The named source contains the answer for every answer that names a source. The f
 
 | # | Criterion | Verdict | How I decided |
 |---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| 1 | Retrieved chunk contains the answer | MET | The retrieved chunks contained the answer for all five questions in every run, so each result was 5/5 against the target of 4/5. |
+| 2 | Every answer names a source | MISSED | Run 1 had only 4/5 answers with a source, even though runs 2 and 3 reached 5/5; the target had to hold across all three runs. |
+| 3 | Gate stops out-of-corpus questions | MET | The deterministic gate refused all five out-of-corpus questions, producing 5/5 in each run-equivalent column against the target of 4/5. |
+| 4 | No chunk has incomplete sentences | MET | All five sampled chunks read as complete thoughts, giving 5/5 in each run against the target of 4/5. |
+| 5 | The named source is the correct one | MET | Run 1 had 4/5 correct source attributions because the Commons answer omitted a source, while runs 2 and 3 had 5/5; each run still met the target of at least 4/5. |
 
 ## Diagnoses
 
