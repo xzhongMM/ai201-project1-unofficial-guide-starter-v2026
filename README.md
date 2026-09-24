@@ -260,6 +260,27 @@ The named source contains the answer for every answer that names a source. The f
 
      Milestone 3. -->
 
+The only recorded miss was criterion 2, and it came from the **generation**
+stage rather than loading, chunking, embedding, or retrieval. In run 1 for the
+Commons question, the answer ended with the source filename in parentheses but
+did not use the `Source:` label that the other answers used. My run-log count
+treated that formatting difference as missing a source, so the count was 4/5;
+runs 2 and 3 used an explicit `Source:` line and scored 5/5. The exact answer
+was:
+
+```
+The wait figure at Kestrel Commons is 20 to 25 minutes between 12:15 and 1:00 (dining_kestrel_commons_followup.txt).
+```
+
+There is no pattern of several questions failing: this was one formatting
+variation in one generated answer. The underlying retrieval was successful,
+and the filename still identifies the correct source, so this result also
+shows that criterion 2's wording is broader than the stricter formatting check
+used in my count. The scorer's mechanism is separate: `scorer.py::judge`
+requires the exact `expects` phrase, which explains the scorer's fail mark for
+this paraphrased Commons answer but does not determine whether a source name
+is present.
+
 ## The Improvement
 
 **What I changed:**
