@@ -123,6 +123,8 @@ I measured the best retrieval distance for my five in-corpus questions and my fi
 
 **2.** I asked AI to help tighten the grounding and cutoff logic so answers would stay honest and sourced. It initially produced a general-sounding answer style that was plausible but not tied to the files, so I revised the grounding instruction to require using only the provided documents, refusing unsupported questions, and naming the source filename in the answer. I also used the measured retrieval distances to set the cutoff at 0.6, because the valid questions clustered around 0.21–0.44 while the off-topic ones were 0.82–0.93, leaving a clear refusal boundary.
 
+**3.** In unit 2, I used AI to compare the run results with my criteria and look for a pattern in the apparent failures. It pointed out that `scorer.py` checks an exact expected phrase, so its `fail` marks could reflect paraphrasing rather than a wrong answer or missing source. I checked that against the saved answers and source documents: the Commons answer the scorer marked fail gave the expected wait time and named the right file. I changed only the generation instruction to require a separate source line, then ran all five questions three times again; the line format became consistent, while the scorer's exact-phrase results did not change.
+
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
      claims earns nothing.
@@ -373,9 +375,29 @@ exact expected phrases, not source formatting.
 
      Milestone 5. -->
 
+No criterion remained below its target after the change. The main remaining
+measurement problem is `scorer.py::judge`: exact substring matching marks
+correct paraphrases as failures and does not measure retrieval coverage,
+source naming, source correctness, chunk completeness, or gate refusal. I would
+replace it with checks tied to each criterion and keep human review for answer
+correctness. I stopped before changing the scorer or retrieval because this
+experiment was meant to isolate one prompt change; changing the evaluator too
+would make the before/after comparison harder to interpret. Criterion 1 also
+needs a more reproducible check in a future run: the current report saves
+retrieved source names, not the retrieved chunk text, so I manually checked the
+chunks for this evaluation.
+
 ## What I'd Do Differently
 
 <!-- Knowing what you know now — which of your five criteria would you write
      differently, and why?
 
      Milestone 5. -->
+
+I would make criterion 2 explicitly require a standalone `Source: filename`
+line if formatting is part of what I want to test; “names a source” alone also
+accepts a filename in parentheses. I would also state how criterion 1's
+retrieved chunks will be inspected and sampled, so another person can reproduce
+the 4-of-5 judgment without relying on my manual review. The after run showed
+that source formatting can be measured consistently, while the current scorer
+cannot measure these broader criteria.
