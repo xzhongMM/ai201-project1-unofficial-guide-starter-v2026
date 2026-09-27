@@ -151,10 +151,10 @@ I measured the best retrieval distance for my five in-corpus questions and my fi
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
 | 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
-| 2. Every answer names a source | 5 of 5 | 4/5 | 5/5 | 5/5 | MISSED |
+| 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
 | 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
 | 4. No chunk has incomplete sentences | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
-| 5. The named source is the correct one | 4 of 5 | 4/5 | 5/5 | 5/5 | MET |
+| 5. The named source is the correct one | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
@@ -182,7 +182,7 @@ Produced by `run_eval.py::run_once`, with answer text from `generate.py::answer_
 The wait figure at Kestrel Commons is 20 to 25 minutes between 12:15 and 1:00 (dining_kestrel_commons_followup.txt).
 ```
 
-This was run 1 for the Commons question and contains no `Source:` line, while runs 2 and 3 did. The resulting counts are 4/5, 5/5, and 5/5.
+This run 1 answer names the source filename in parentheses. Although it did not use the separate `Source:` label, it meets the written criterion, so the correct count is 5/5 in each run.
 
 ### Criterion 3 — gate stops out-of-corpus questions
 
@@ -219,7 +219,7 @@ Produced by `run_eval.py::run_once`, with answer text from `generate.py::answer_
 Juniors and seniors are ordered by accumulated credit hours first, and only tie-break randomly (admin_housing_lottery.txt).
 ```
 
-The named source contains the answer for every answer that names a source. The first Commons answer omitted a source, so the counts are 4/5, 5/5, and 5/5.
+Every answer names the document that contains its answer, including the Commons answer above, so the count is 5/5 in each run.
 
 ## Verdicts
 
@@ -235,10 +235,10 @@ The named source contains the answer for every answer that names a source. The f
 | # | Criterion | Verdict | How I decided |
 |---|---|---|---|
 | 1 | Retrieved chunk contains the answer | MET | The retrieved chunks contained the answer for all five questions in every run, so each result was 5/5 against the target of 4/5. |
-| 2 | Every answer names a source | MISSED | Run 1 had only 4/5 answers with a source, even though runs 2 and 3 reached 5/5; the target had to hold across all three runs. |
+| 2 | Every answer names a source | MET | All 15 answers named a source filename; the first Commons answer used parentheses instead of a `Source:` line, but still met the criterion as written. |
 | 3 | Gate stops out-of-corpus questions | MET | The deterministic gate refused all five out-of-corpus questions, producing 5/5 in each run-equivalent column against the target of 4/5. |
 | 4 | No chunk has incomplete sentences | MET | All five sampled chunks read as complete thoughts, giving 5/5 in each run against the target of 4/5. |
-| 5 | The named source is the correct one | MET | Run 1 had 4/5 correct source attributions because the Commons answer omitted a source, while runs 2 and 3 had 5/5; each run still met the target of at least 4/5. |
+| 5 | The named source is the correct one | MET | All 15 answers named the document containing the answer, for 5/5 in every run. |
 
 ## Diagnoses
 
@@ -260,32 +260,35 @@ The named source contains the answer for every answer that names a source. The f
 
      Milestone 3. -->
 
-The only recorded miss was criterion 2, and it came from the **generation**
-stage rather than loading, chunking, embedding, or retrieval. In run 1 for the
-Commons question, the answer ended with the source filename in parentheses but
-did not use the `Source:` label that the other answers used. My run-log count
-treated that formatting difference as missing a source, so the count was 4/5;
-runs 2 and 3 used an explicit `Source:` line and scored 5/5. The exact answer
-was:
+On review, there were no actual misses against the written criteria. The
+Commons answer in run 1 named its source filename in parentheses, so my earlier
+4/5 for criterion 2 incorrectly treated a formatting variation as a missing
+source. The answer was:
 
 ```
 The wait figure at Kestrel Commons is 20 to 25 minutes between 12:15 and 1:00 (dining_kestrel_commons_followup.txt).
 ```
 
-There is no pattern of several questions failing: this was one formatting
-variation in one generated answer. The underlying retrieval was successful,
-and the filename still identifies the correct source, so this result also
-shows that criterion 2's wording is broader than the stricter formatting check
-used in my count. The scorer's mechanism is separate: `scorer.py::judge`
-requires the exact `expects` phrase, which explains the scorer's fail mark for
-this paraphrased Commons answer but does not determine whether a source name
-is present.
+The original scorer mark was not a criterion verdict: `scorer.py::judge`
+checks whether the exact `expects` phrase appears in the answer. It marked this
+paraphrase as fail because it did not repeat "during lunchtime, it's about 20
+to 25 minutes" verbatim, even though the answer gave the same wait time and
+named its source. The `run_eval.py` scorer output therefore cannot measure
+source attribution or retrieval coverage by itself. Since every criterion
+scored 5/5 against a 4/5 target (or 5/5 for source naming), the targets were
+somewhat conservative; criterion 1 is the one I would tighten to require the
+retrieved chunks to contain the answer for all 5 of 5 questions.
 
 ## The Improvement
 
 **What I changed:**
+In `generate.py::GROUNDING_INSTRUCTION`, I required every answer to end with a
+separate `Source: filename.txt` line.
 
 **Why I picked it:**
+The before run varied in how it displayed the source filename. This single
+prompt change tests whether an explicit format instruction makes attribution
+consistent without changing retrieval, chunking, or the gate.
 
 <!-- Connect it to a specific diagnosis above in one sentence. If you can't,
      you picked a fix because it sounded impressive. -->
@@ -297,13 +300,61 @@ is present.
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 4. No chunk has incomplete sentences | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 5. The named source is the correct one | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+
+**Evidence file:** `results/run_2026-09-26_2215_after.md`. The raw `run_eval.py`
+verdicts there test exact `expects` phrases, not all five criteria; the table
+above reflects manual review of the retrieved chunks, generated answers,
+sources, and out-of-scope gate results.
+
+### After-run output samples
+
+Criterion 1 — retrieved chunk and answer, produced by `run_eval.py::run_once`
+and `store.py::search`:
+
+```
+Sources retrieved: dining_halden_hall_followup.txt, dining_kestrel_commons_followup.txt, dining_north_kitchen_followup.txt, dining_the_atrium_followup.txt, dining_the_ridgeway_cafe_followup.txt
+Students note that the wait figure of 20 to 25 minutes between 12:15 and 1:00 at Kestrel Commons matches what they have seen.
+```
+
+Criterion 2 — source naming, produced by `generate.py::answer_from_chunks`:
+
+```
+Students note that the wait figure of 20 to 25 minutes between 12:15 and 1:00 at Kestrel Commons matches what they have seen.
+Source: dining_kestrel_commons_followup.txt
+```
+
+Criterion 3 — out-of-scope gate, produced by `run_eval.py::check_out_of_scope`
+and `gate.py::check`:
+
+```
+-> gate refused 5 of 5
+```
+
+Criterion 4 — sampled chunk, produced by `chunker.py::split_documents`:
+
+```
+You can add a course through the end of the second week. Dropping is a longer window — through the end of week six — but a drop after week two shows as a W on your transcript.
+```
+
+Criterion 5 — correct source attribution, produced by
+`generate.py::answer_from_chunks`:
+
+```
+Juniors and seniors are ordered by accumulated credit hours first, and only tie-broken randomly in the housing lottery.
+Source: admin_housing_lottery.txt
+```
 
 **Did it help?**
+It improved source formatting: all 15 after answers use a separate `Source:`
+line, compared with mixed formatting before. It did not change the actual
+criterion scores, because every criterion already met its target before the
+change. The scorer pass/fail pattern also stayed the same because it checks
+exact expected phrases, not source formatting.
 
 <!-- Say plainly whether it did, and how you know. If it made things worse,
      say that — a change that backfired, honestly reported, earns full credit
